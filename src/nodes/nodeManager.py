@@ -5,7 +5,7 @@ Date: 01-02-2026
 Description: Class declaration for a program that manages the creation of nodes 
 and the automatic assignment of node IDs.
 """
-from node import Node
+from src.nodes.node import Node
 
 class NodeManager:
     # Default unit values
@@ -20,11 +20,15 @@ class NodeManager:
         self.default_pressure = d_press
         self.default_mflow = d_mflow
 
-    def addNode(self):
-        nodeCt = self.nodes.len()
-        node = Node(nodeCt)
+    def addNode(self, node : Node):
+        nodeCt = len(self.nodes)
+        if(Node is None or not isinstance(node, Node)):
+            node = Node(nodeCt)
 
-        node.setPressureUnits(self.default_Pressure)
-        node.setTemperatureUnits(self.default_Temperature)
+        node.setPressureUnits(self.default_pressure)
+        node.setTemperatureUnits(self.default_temp)
         
         self.nodes.append(node)
+    def update(self):
+        for node in self.nodes:
+            node.update()

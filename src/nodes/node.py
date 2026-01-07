@@ -5,6 +5,8 @@ Date: 01-02-2026
 Description: Class declaration for a generic pressure/temperature node.
 """
 
+from time import time
+
 class Node:
     id = -1
     temperature = -1
@@ -16,6 +18,8 @@ class Node:
 
     def __init__(self, id):
         self.id = id
+        self.startTime = time()
+        self.timeSinceStart = 0
 
     def getTemperature(self):
         return self.temperature
@@ -40,5 +44,12 @@ class Node:
     
     def setPressureUnits(self, units):
         self.pressure_units = units
+    
+    def update(self):
+        self.timeSinceStart = time() - self.startTime
+
+    def getTimeSinceStart(self):
+        return self.timeSinceStart
+        
 
     
