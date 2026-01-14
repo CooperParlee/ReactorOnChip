@@ -32,4 +32,9 @@ class DeviceInline(Device):
         self.inlet_node = inlet
         self.outlet_node = outlet
         
+    def setResistanceCoefficient (self, k):
+        self.k = k
+
+    def getResistanceCoefficient (self):
+        return self.k
 

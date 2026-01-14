@@ -17,7 +17,7 @@ class Device:
         if (type(address) is not int):
             raise TypeError("Address must be of type integer.")
 
-        self.addresses = self.addresses.append()
+        self.addresses.append(address)
 
     def removeAddress(self, address):
         if (address in self.addresses):
