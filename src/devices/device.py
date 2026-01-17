@@ -10,6 +10,15 @@ from warnings import warn
 class Device:
     addresses = []
 
+    def __init__(self, k=0):
+        self.k = k
+
+    def getK(self):
+        return self.k
+
+    def setK(self, k):
+        self.k = k
+
     def getAddresses(self):
         return self.addresses
     
