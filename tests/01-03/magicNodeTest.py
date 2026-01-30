@@ -8,7 +8,7 @@ Description: Basic test of the engine using the fabled magic node.
 from src.nodes.nodeManager import NodeManager
 from src.nodes.magicNode import MagicNode
 from src.modBus.modbusManager import ModbusManager
-from src.devices.deviceTempSensor import DeviceTempSensor
+from src.devices import DeviceTempSensor
 
 from time import sleep
 
