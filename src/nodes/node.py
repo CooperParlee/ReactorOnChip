@@ -6,6 +6,7 @@ Description: Class declaration for a generic pressure/temperature node.
 """
 
 from time import time
+from warnings import warn
 
 class Node:
     id = -1
@@ -59,6 +60,8 @@ class Node:
         Args:
             inletDevice (Device): the new inlet device to the node.
         """
+        if (self.inlet_attached is not None):
+            warn(f"An override is occuring of the inlet attached to node {self.getId()}.")
         self.inlet_attached = inletDevice
     
     def attachOutlet(self, outletDevice):
@@ -67,6 +70,8 @@ class Node:
         Args:
             outletDevice (Device): the new outlet device of the node.
         """
+        if (self.outlet_attached is not None):
+            warn(f"An override is occuring of the outlet attached to node {self.getId()}.")
         self.outlet_attached = outletDevice
     
     def getOutletDevice(self):
