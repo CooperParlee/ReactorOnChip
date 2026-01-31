@@ -17,7 +17,7 @@ class DevicePump (DeviceInline):
     def __init__(self, manager : "NodeManager", inlet=-1, outlet=-1):
         super().__init__(manager, inlet, outlet)
         self.setpoint = 0
-        self.operatingPoint = 0
+        self.processPoint = 0 # percent of pump maximum RPMs, used for updating the curve function
         self.lastUpdate = -1
         self.curve = lambda q: 0*q
 
@@ -33,7 +33,18 @@ class DevicePump (DeviceInline):
             self.curve = curve
 
     def getPumpCurve(self):
-        return self.curve
+        """Returns the modified pump curve of the pump and is driven by the processPoint variable
+        that is, what percent the pump is of its maximum efficient speed.
 
+        Returns:
+            Callable: A function that expects a flow rate double and returns the head provided by the pump at
+            its current process point.
+        """
+        return lambda q: self.processPoint * self.curve(q*(1-self.processPoint))
+
+    def setProcessPoint(self, sp):
+        if (sp > 1.0 or sp < 0):
+            warn("Process point should be a floating point value between 0.0 and 1.0")
+        self.processPoint = min(max(sp, 0), 1)
     
         
