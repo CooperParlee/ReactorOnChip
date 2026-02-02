@@ -9,7 +9,7 @@ from src.nodes.nodeManager import NodeManager, ControlLoop
 from src.devices import DevicePump
 from src.devices import DevicePipe
 from src.devices import DeviceInline
-from time import time
+from time import time, sleep
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -47,44 +47,65 @@ p3 = DevicePipe(mgr, hxheater.getOutlet(), pump.getInlet(), roughness=rough, len
 
 controlLoop.addDevices([pump, hxcooler, hxheater, p1, p2, p3])
 
-k = controlLoop.getKFactor()
-
-# Flow rate in m^3/min
-q = np.linspace(0, 0.15, 12) 
-q_adj = np.linspace(0, 1, 25)
-mjr = []
-mnr = []
+controlLoop.setReferenceNode(pump.getInlet())
 pump.setProcessPoint(1)
-pumpCurve = pump.getPumpCurve()(q_adj/60)
-pump.setProcessPoint(0.8)
-pumpCurve2 = pump.getPumpCurve()(q_adj/60)
-pump.setProcessPoint(0.5)
-pumpCurve3 = pump.getPumpCurve()(q_adj/60)
-pump.setProcessPoint(0.3)
-pumpCurve4 = pump.getPumpCurve()(q_adj/60)
+
+def startUpdates(sleepTime = 0.05):
+    run = True
+    while(run == True):
+        op = controlLoop.computeOpPoint()
+        flow = op[0]
+        controlLoop.computeDeltas(flow)
+
+        sleep(sleepTime)
+        run = False
+
+    for node in mgr.getNodes():
+        print(f"Node {node.getId()} has a pressure of {node.getPressure()} kPa")
+
+startUpdates()
+
+# k = controlLoop.getKFactor()
+
+# # Flow rate in m^3/min
+# q = np.linspace(0, 0.15, 12) 
+# #q_adj = np.linspace(0, 1, 25)
+# mjr = []
+# mnr = []
+# pump.setProcessPoint(1)
+# pumpCurve = pump.getPumpCurve()(q/60)
+# pump.setProcessPoint(0.8)
+# pumpCurve2 = pump.getPumpCurve()(q/60)
+# pump.setProcessPoint(0.5)
+# pumpCurve3 = pump.getPumpCurve()(q/60)
+# pump.setProcessPoint(0.3)
+# pumpCurve4 = pump.getPumpCurve()(q/60)
 
 
-for _q in q:
-    mjr.append(controlLoop.computeTotalMajor(_q/60))
-    mnr.append(controlLoop.computeTotalMinor(_q/60))
+# for _q in q:
+#     mjr.append(controlLoop.computeTotalMajor(_q/60))
+#     mnr.append(controlLoop.computeTotalMinor(_q/60))
 
-mjr = np.array(mjr)
-mnr = np.array(mnr)
+# mjr = np.array(mjr)
+# mnr = np.array(mnr)
 
-intersect = controlLoop.computeOpPoint()
+# intersect = controlLoop.computeOpPoint()
 
-print(intersect)
+# print(intersect)
 
-plt.figure()
-plt.plot(q, mjr, label="Major Losses", color="blue")
-plt.plot(q, mnr, label="Minor Losses", color="red")
-plt.plot(q, mjr + mnr, label="Total", color="green")
-plt.plot(q_adj, pumpCurve, label="Pump Curve", color="blue", linestyle="dashed")
-plt.plot(q_adj, pumpCurve2, label="Pump Curve", color="blue", linestyle="dashed")
-plt.plot(q_adj, pumpCurve3, label="Pump Curve", color="blue", linestyle="dashed")
-plt.plot(q_adj, pumpCurve4, label="Pump Curve", color="blue", linestyle="dashed")
-plt.title("Heat Exchanger System Operating Point")
-plt.xlabel(r"Flow Rate ($m^3min^{-1}$)")
-plt.ylabel("Head Loss (m)")
-plt.legend()
-plt.show()
+# plt.figure()
+# plt.plot(q, mjr, label="Major Losses", color="blue")
+# plt.plot(q, mnr, label="Minor Losses", color="red")
+# plt.plot(q, mjr + mnr, label="Total", color="green")
+# plt.plot(q, pumpCurve, label="Pump Curve", color="blue", linestyle="dashed")
+# plt.plot(q, pumpCurve2, label="Pump Curve", color="blue", linestyle="dashed")
+# plt.plot(q, pumpCurve3, label="Pump Curve", color="blue", linestyle="dashed")
+# plt.plot(q, pumpCurve4, label="Pump Curve", color="blue", linestyle="dashed")
+# plt.title("Heat Exchanger System Operating Point")
+# plt.xlabel(r"Flow Rate ($m^3min^{-1}$)")
+# plt.ylabel("Head Loss (m)")
+# plt.legend()
+# plt.show()
+
+# mc delta t
+# U a delta t

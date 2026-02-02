@@ -59,14 +59,10 @@ class NodeManager:
         else: 
             return None
 
-    def update(self):
-        for node in self.nodes:
-            node.update()
-
 class ControlLoop:
     devices : list[Device] = []
 
-    def __init__(self, density=999, viscosity=1.02E-3):
+    def __init__(self, density=999, viscosity=1.02E-3, reference_node = None):
         self.density = density
         self.viscosity = viscosity
         self.k = -1
@@ -74,6 +70,12 @@ class ControlLoop:
         self.pipes = []
         self.nodes = {}
         self.pumps = []
+        self.reference_node = reference_node
+
+    def setReferenceNode(self, reference_node : Node, offset_pressure = 0, offset_temperature = 0):
+        self.reference_node = reference_node
+        self.offset_pressure = 0
+        self.offset_temperature = 0
 
     def addNode(self, node):
         id = node.getId()
@@ -183,11 +185,44 @@ class ControlLoop:
         #print(f"q: {q * 60} Minor: {self.computeTotalMinor(q)} Major: {self.computeTotalMajor(q)} Pump: {self.totalPumpCurve(q)} Error: {error}")
         return error
 
-    def computeOpPoint (self): 
+    def computeOpPoint (self, recompute=True): 
+        if (recompute):
+            start = time()
+            soln = opt.root_scalar(self.equation, 
+            method="brentq", bracket=[0.00001, 0.25/60])
+            print (soln.root*60)
+            return soln.root, self.totalPumpCurve(soln.root)
+        return 0,0
+
+    def __iterateDelta__ (self, device, flow, last_pressure):
+        if(device.getOutlet() == self.reference_node):
+            return 
+        drop = 0
+        mj = 0
+        mn = 0
+        if (flow != 0):
+            if (callable(getattr(device, 'computeMinorLoss', None))):
+                mn = -device.computeMinorLoss(flow)
+            if (callable(getattr(device, 'computeMajorLoss', None))):
+                mj = -device.computeMajorLoss(flow)
+            if (isinstance(device, DevicePump)):
+                #print("device is a pump!!")
+                drop = device.getPumpCurve()(flow)
+
+        drop = drop + mj + mn
+        
+        last_pressure = last_pressure + drop * self.density * 9.81 / 1000
+        
+        device.getOutlet().setPressure(last_pressure)
+        return self.__iterateDelta__ (device.getOutlet().getOutletDevice(), flow, last_pressure)
+
+
+    def computeDeltas(self, flow):
+        self.reference_node.setPressure(self.offset_pressure)
         start = time()
-        soln = opt.root_scalar(self.equation, 
-        method="bisect", bracket=[0, 0.25/60])
-        print(f"Delta: {time() - start}")
-        return soln.root*60, self.totalPumpCurve(soln.root)
+        chain = self.__iterateDelta__(self.reference_node.getOutletDevice(), flow, self.offset_pressure)
+        finish = time() - start
+        print(f"Iterating deltas took {finish} seconds.")
+        
         
         

@@ -44,17 +44,20 @@ class DeviceInline(Device):
             self.diameter = manager.getDefaultDiameter()
         else:
             self.diameter = diameter
+        self.a = (self.diameter ** 2 * pi / 4)
 
     def getInlet(self):
         return self.inlet_node
 
     def getOutlet(self):
         return self.outlet_node
+    
+    def getDiameter(self):
+        return self.diameter
 
     def computeMinorLoss(self, Q):
 
         g = 9.81
-        a = (self.diameter ** 2 * pi / 4)
-        v = Q / a
+        v = Q / self.a
 
         return self.k * (v**2 / 2 / g)
