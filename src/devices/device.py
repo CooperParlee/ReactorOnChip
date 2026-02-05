@@ -8,11 +8,11 @@ Description: File for the class declaration for a generic device.
 from warnings import warn
 
 class Device:
-    addresses = []
 
     def __init__(self, k=0, verbose=False):
         self.k = k
         self.verbose = verbose
+        self.addresses = []
 
     def getK(self):
         return self.k

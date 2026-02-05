@@ -45,7 +45,6 @@ class ModbusManager:
         self.addresses = {}
 
     def addSensor(self, device: Device, address=-1):
-        print("Add sensor")
         if (address == -1):
             # Find next empty id
             for i in range(400, 499):
@@ -55,8 +54,12 @@ class ModbusManager:
                     break
             if (address == -1): 
                 raise LookupError("Unable to find an empty sensor id in the specified range")
+        print(f"Add sensor to address {address}")
         self.addresses[address] = device
         device.addAddress(address)
         print("Successfully added device")
         
-
+    def addSensors(self, devices: list[Device]):
+        for device in devices:
+            if isinstance(device, Device):
+                self.addSensor(device)

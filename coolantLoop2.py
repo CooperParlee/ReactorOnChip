@@ -9,9 +9,13 @@ from src.nodes.nodeManager import NodeManager, ControlLoop
 from src.devices import DevicePump
 from src.devices import DevicePipe
 from src.devices import DeviceInline
+from src.devices import DevicePressureSensor
+from src.modBus import ModbusManager
 from time import time, sleep
 import numpy as np
 import matplotlib.pyplot as plt
+import asyncio
+import threading
 
 start = time()
 
@@ -49,6 +53,26 @@ controlLoop.addDevices([pump, hxcooler, hxheater, p1, p2, p3])
 
 controlLoop.setReferenceNode(pump.getInlet())
 pump.setProcessPoint(1)
+
+# Sensors
+pumpIn = DevicePressureSensor(pump.getInlet())
+pumpOut = DevicePressureSensor(pump.getOutlet())
+
+coolerIn = DevicePressureSensor(hxcooler.getInlet())
+coolerOut = DevicePressureSensor(hxcooler.getOutlet())
+
+htrIn = DevicePressureSensor(hxheater.getInlet())
+htrOut = DevicePressureSensor(hxheater.getOutlet())
+
+modbusMgr = ModbusManager()
+
+modbusMgr.addSensors([pumpIn, pumpOut, coolerIn, coolerOut, htrIn, htrOut])
+
+def start_server():
+    asyncio.run(modbusMgr.run_server())
+
+serverThread = threading.Thread(target=start_server)
+serverThread.start()
 
 def startUpdates(sleepTime = 0.05):
     run = True

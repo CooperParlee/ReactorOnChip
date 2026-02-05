@@ -11,6 +11,7 @@ class DeviceParallel (Device):
     attached_node: Node = -1
 
     def __init__ (self, attached_node : Node):
+        super().__init__()
         if(not isinstance(attached_node, Node)):
             raise TypeError("Attached node must be of type Node.")
         self.attached_node = attached_node

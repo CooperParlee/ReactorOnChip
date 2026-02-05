@@ -6,6 +6,7 @@ from src.devices.devicePipe import DevicePipe
 from src.devices.devicePump import DevicePump
 from src.devices.devicePumpBasic import DevicePumpBasic
 from src.devices.deviceTempSensor import DeviceTempSensor
+from src.devices.devicePressureSensor import DevicePressureSensor
 
 __all__ = [
     "Device",
@@ -15,5 +16,6 @@ __all__ = [
 #    "DevicePlateHX",
     "DevicePump",
     "DevicePumpBasic",
-    "DeviceTempSensor"
+    "DeviceTempSensor",
+    "DevicePressureSensor"
 ]
