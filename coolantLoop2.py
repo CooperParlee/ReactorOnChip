@@ -54,7 +54,7 @@ controlLoop.addDevices([pump, hxcooler, hxheater, p1, p2, p3])
 controlLoop.setReferenceNode(pump.getInlet())
 pump.setProcessPoint(1)
 
-# Sensors
+# Initialize the sensors
 pumpIn = DevicePressureSensor(pump.getInlet())
 pumpOut = DevicePressureSensor(pump.getOutlet())
 
@@ -64,16 +64,21 @@ coolerOut = DevicePressureSensor(hxcooler.getOutlet())
 htrIn = DevicePressureSensor(hxheater.getInlet())
 htrOut = DevicePressureSensor(hxheater.getOutlet())
 
+# Start the modbus manager and add our sensors to it
 modbusMgr = ModbusManager()
 
 modbusMgr.addSensors([pumpIn, pumpOut, coolerIn, coolerOut, htrIn, htrOut])
+modbusMgr.register_hr_callback(300, pump.processPointCallback)
 
+# Create a function "task" for the asynchronous thread
 def start_server():
     asyncio.run(modbusMgr.run_server())
 
+# Initialize and start the asynchronous modbus manager thread
 serverThread = threading.Thread(target=start_server)
 serverThread.start()
 
+# Initialize the synchronous thread
 def startUpdates(sleepTime = 0.05):
     run = True
     while(run == True):
@@ -81,11 +86,12 @@ def startUpdates(sleepTime = 0.05):
         flow = op[0]
         controlLoop.computeDeltas(flow)
 
-        sleep(sleepTime)
-        run = False
+        print(pump.getOutlet().getPressure())
 
-    for node in mgr.getNodes():
-        print(f"Node {node.getId()} has a pressure of {node.getPressure()} kPa")
+        sleep(sleepTime)
+
+    #for node in mgr.getNodes():
+    #    print(f"Node {node.getId()} has a pressure of {node.getPressure()} kPa")
 
 startUpdates()
 

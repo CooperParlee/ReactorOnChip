@@ -22,7 +22,7 @@ class ModbusManager:
                 for address in sensor.getAddresses():
                     #print(address)
                     value = sensor.get() * 100 + 100
-                    print(f"Updating sensor on address {address} to {value}")
+                    #print(f"Updating sensor on address {address} to {value}")
                     server_context.setValues(4, address, [int(value)])
 
 
@@ -38,11 +38,53 @@ class ModbusManager:
         context = ModbusServerContext(devices=self.store, single=True) # Create context containing one store as single context
 
         asyncio.create_task(self.updateSensors(context))
+        asyncio.create_task(self.monitorHoldingRegisters(context))
 
         await StartAsyncTcpServer(context=context, address=(address, port))
 
     def __init__(self):
         self.addresses = {}
+        self.holding_register_cache = {} # store last holding register status
+        self.holding_register_callbacks = {} # Store callbacks for addresses
+
+    def register_hr_callback (self, address, callback):
+        """
+        Saves a method to execute (inside or outside of thread) to call if the specific
+        holding register address changes.
+
+        Args:
+            address (int): the holding register to monitor
+            callback (function): Function to call with signature callback(address, old_value, new_value)
+        """
+
+        if address not in self.holding_register_callbacks:
+            self.holding_register_callbacks[address] = []
+        self.holding_register_callbacks[address].append(callback)
+
+    async def monitorHoldingRegisters(self, context: ModbusServerContext):
+        server_context = context[1]
+
+        while True:
+            await asyncio.sleep(0.05)
+
+            current_vals = server_context.getValues(0x03, 300, count=99)
+            addresses = range(300, 400)
+
+            for i in range(len(current_vals)):
+                val = current_vals[i]
+                address = addresses[i]
+                old_val = self.holding_register_cache.get(address)
+                if(old_val != val):
+                    print(f"address changed to {val}")
+                    if address in self.holding_register_callbacks:
+                        for callback in self.holding_register_callbacks[address]:
+                            try:
+                                await callback(address, old_val, val)
+                            except Exception as e:
+                                print(f"Error in callback for address {address}: {e}")
+                    self.holding_register_cache[address] = val
+
+
 
     def addSensor(self, device: Device, address=-1):
         if (address == -1):

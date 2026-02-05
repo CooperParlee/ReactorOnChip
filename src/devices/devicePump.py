@@ -46,5 +46,9 @@ class DevicePump (DeviceInline):
         if (sp > 1.0 or sp < 0):
             warn("Process point should be a floating point value between 0.0 and 1.0")
         self.processPoint = min(max(sp, 0), 1)
+
+    async def processPointCallback(self, address, old, new):
+        print(f"changing process point from {old} to {new}")
+        self.setProcessPoint(new/1000)
     
         
