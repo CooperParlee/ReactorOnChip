@@ -21,7 +21,7 @@ class ModbusManager:
                 sensor = self.addresses[sensorAddress]
                 for address in sensor.getAddresses():
                     #print(address)
-                    value = sensor.get() * 100
+                    value = sensor.get() * sensor.getScale()
                     #print(f"Updating sensor on address {address} to {value}")
                     server_context.setValues(4, address, [int(value)])
 

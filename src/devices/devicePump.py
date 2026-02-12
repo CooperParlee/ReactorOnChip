@@ -60,7 +60,7 @@ class DevicePump (DeviceInline):
         self.processPoint = min(max(sp, 0), 1)
 
     def getSpeed (self):
-        return self.maxSpeed * self.processPoint
+        return int(self.maxSpeed * self.processPoint)
 
     async def processPointCallback(self, address, old, new):
         print(f"changing process point from {old} to {new}")

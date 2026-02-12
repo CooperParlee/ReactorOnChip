@@ -10,6 +10,7 @@ from src.devices import DevicePump
 from src.devices import DevicePipe
 from src.devices import DeviceInline
 from src.devices import DevicePressureSensor
+from src.devices import DeviceSpeedSensor
 from src.modBus import ModbusManager
 from time import time, sleep
 import numpy as np
@@ -64,10 +65,12 @@ coolerOut = DevicePressureSensor(hxcooler.getOutlet())
 htrIn = DevicePressureSensor(hxheater.getInlet())
 htrOut = DevicePressureSensor(hxheater.getOutlet())
 
+pumpSpeed = DeviceSpeedSensor(pump)
+
 # Start the modbus manager and add our sensors to it
 modbusMgr = ModbusManager()
 
-modbusMgr.addSensors([pumpIn, pumpOut, coolerIn, coolerOut, htrIn, htrOut])
+modbusMgr.addSensors([pumpIn, pumpOut, coolerIn, coolerOut, htrIn, htrOut, pumpSpeed])
 modbusMgr.register_hr_callback(300, pump.processPointCallback)
 
 # Create a function "task" for the asynchronous thread
