@@ -62,6 +62,8 @@ class NodeManager:
 class ControlLoop:
     devices : list[Device] = []
 
+    minCheck = 0.0001
+
     def __init__(self, density=999, viscosity=1.02E-3, reference_node = None):
         self.density = density
         self.viscosity = viscosity
@@ -76,6 +78,9 @@ class ControlLoop:
         self.reference_node = reference_node
         self.offset_pressure = 0
         self.offset_temperature = 0
+
+    def getPumps(self):
+        return self.pumps
 
     def addNode(self, node):
         id = node.getId()
@@ -186,8 +191,13 @@ class ControlLoop:
         return error
 
     def computeOpPoint (self, recompute=True): 
+        if(self.totalPumpCurve(0.0001)<= 0):
+            return 0, 0
         if (recompute):
             start = time()
+
+            if (self.equation(self.minCheck)>0):
+                return 0,0
             soln = opt.root_scalar(self.equation, 
             method="brentq", bracket=[0.00001, 0.25/60])
             print (soln.root*60)

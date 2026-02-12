@@ -82,6 +82,9 @@ serverThread.start()
 def startUpdates(sleepTime = 0.05):
     run = True
     while(run == True):
+        for pump in controlLoop.getPumps():
+            pump.update()
+        
         op = controlLoop.computeOpPoint()
         flow = op[0]
         controlLoop.computeDeltas(flow)
