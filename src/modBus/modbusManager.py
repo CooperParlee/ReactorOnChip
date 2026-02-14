@@ -47,6 +47,8 @@ class ModbusManager:
         self.holding_register_cache = {} # store last holding register status
         self.holding_register_callbacks = {} # Store callbacks for addresses
 
+        self.lastFree = 400
+
     def register_hr_callback (self, address, callback):
         """
         Saves a method to execute (inside or outside of thread) to call if the specific
@@ -89,10 +91,11 @@ class ModbusManager:
     def addSensor(self, device: Device, address=-1):
         if (address == -1):
             # Find next empty id
-            for i in range(400, 499):
+            for i in range(self.lastFree, 499):
                 if i not in self.addresses:
                     address = i
                     print(i)
+                    self.lastFree = i+1
                     break
             if (address == -1): 
                 raise LookupError("Unable to find an empty sensor id in the specified range")

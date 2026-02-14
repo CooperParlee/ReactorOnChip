@@ -9,7 +9,7 @@ from src.nodes.nodeManager import NodeManager, ControlLoop
 from src.devices import DevicePump
 from src.devices import DevicePipe
 from src.devices import DeviceInline
-from src.devices import DevicePressureSensor
+from src.devices import DevicePressureSensor, DeviceTempSensor
 from src.devices import DeviceSpeedSensor
 from src.modBus import ModbusManager
 from time import time, sleep
@@ -67,10 +67,22 @@ htrOut = DevicePressureSensor(hxheater.getOutlet())
 
 pumpSpeed = DeviceSpeedSensor(pump)
 
+# Initialize the temperatures
+mgr.initializeTemps()
+
+htrTempIn = DeviceTempSensor(hxheater.getInlet())
+htrTempOut = DeviceTempSensor(hxheater.getOutlet())
+
 # Start the modbus manager and add our sensors to it
 modbusMgr = ModbusManager()
 
-modbusMgr.addSensors([pumpIn, pumpOut, coolerIn, coolerOut, htrIn, htrOut, pumpSpeed])
+modbusMgr.addSensors([
+    # Pressure Sensors:
+    pumpIn, pumpOut, coolerIn, coolerOut, htrIn, htrOut, 
+    # Temperature Sensors:
+    htrTempIn, htrTempOut,
+    # Other:
+    pumpSpeed])
 modbusMgr.register_hr_callback(300, pump.processPointCallback)
 
 # Create a function "task" for the asynchronous thread
@@ -82,7 +94,7 @@ serverThread = threading.Thread(target=start_server)
 serverThread.start()
 
 # Initialize the synchronous thread
-def startUpdates(sleepTime = 0.05):
+def startUpdates(sleepTime = 0.5):
     run = True
     while(run == True):
         for pump in controlLoop.getPumps():

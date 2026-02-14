@@ -58,6 +58,16 @@ class NodeManager:
             return self.nodes[id]
         else: 
             return None
+            
+    def initializeTemps (self, init_temp = 273):
+        """Initialize all of the nodes within the node manager to a defined temperature. The default is 273*K.
+
+        Args:
+            init_temp (int, optional): temperature to initialize the nodes to. Defaults to 273*K.
+        """
+        for node in self.nodes:
+            node.setTemperature(init_temp)
+
 
 class ControlLoop:
     devices : list[Device] = []
@@ -226,7 +236,6 @@ class ControlLoop:
         device.getOutlet().setPressure(last_pressure)
         return self.__iterateDelta__ (device.getOutlet().getOutletDevice(), flow, last_pressure)
 
-
     def computeDeltas(self, flow):
         self.reference_node.setPressure(self.offset_pressure)
         start = time()
@@ -234,5 +243,5 @@ class ControlLoop:
         finish = time() - start
         print(f"Iterating deltas took {finish} seconds.")
         
-        
+    
         
