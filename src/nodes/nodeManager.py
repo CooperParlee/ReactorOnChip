@@ -12,6 +12,8 @@ from src.devices import DeviceInline
 from src.devices import DeviceParallel
 from src.devices import DevicePump
 
+from src.material import MaterialWater
+
 from warnings import warn
 from scipy import optimize as opt
 from time import time
@@ -25,11 +27,12 @@ class NodeManager:
 
     nodes: list[Node] = []
 
-    def __init__(self, d_temp='K', d_press='kPa', d_mflow='kg/s', default_diameter=0.1):
+    def __init__(self, d_temp='K', d_press='kPa', d_mflow='kg/s', default_diameter=0.1, default_mat = MaterialWater):
         self.default_temp = d_temp
         self.default_pressure = d_press
         self.default_mflow = d_mflow
         self.default_diameter = default_diameter
+        self.default_mat = default_mat
         self.nodes = []
     def getDefaultDiameter (self):
         return self.default_diameter
@@ -44,6 +47,7 @@ class NodeManager:
 
         node.setPressureUnits(self.default_pressure)
         node.setTemperatureUnits(self.default_temp)
+        node.setContainedMaterial(self.default_mat)
         if (self.nodes is None):
             self.nodes[0] = node
         
@@ -58,7 +62,7 @@ class NodeManager:
             return self.nodes[id]
         else: 
             return None
-            
+
     def initializeTemps (self, init_temp = 273):
         """Initialize all of the nodes within the node manager to a defined temperature. The default is 273*K.
 
@@ -214,7 +218,7 @@ class ControlLoop:
             return soln.root, self.totalPumpCurve(soln.root)
         return 0,0
 
-    def __iterateDelta__ (self, device, flow, last_pressure):
+    def __iterateDeltaP__ (self, device, flow, last_pressure):
         if(device.getOutlet() == self.reference_node):
             return 
         drop = 0
@@ -234,14 +238,47 @@ class ControlLoop:
         last_pressure = last_pressure + drop * self.density * 9.81 / 1000
         
         device.getOutlet().setPressure(last_pressure)
-        return self.__iterateDelta__ (device.getOutlet().getOutletDevice(), flow, last_pressure)
+        return self.__iterateDeltaP__ (device.getOutlet().getOutletDevice(), flow, last_pressure) 
 
     def computeDeltas(self, flow):
+        if (self.lastTime == None):
+            self.lastTime = time()
+        dTime = time() - self.lastTime
+
         self.reference_node.setPressure(self.offset_pressure)
         start = time()
-        chain = self.__iterateDelta__(self.reference_node.getOutletDevice(), flow, self.offset_pressure)
+        chain = self.__iterateDeltaP__(self.reference_node.getOutletDevice(), flow, self.offset_pressure)
         finish = time() - start
-        print(f"Iterating deltas took {finish} seconds.")
+        print(f"Iterating P deltas took {finish} seconds.")
+
+        start = time()
+        chainT = self.__iterateDeltaT__(self.reference_node.getOutletDevice(), flow, dTime)
+
+        self.lastTime = time()
         
-    
+    def determineSysVol(self):
+        dev = self.devices
+
+        totVol = 0
+
+        for device in dev:
+            if (callable(getattr(device, 'getVolume'))):
+                print(f"{device}: {device.getVolume()}")
+                totVol = totVol + device.getVolume()
+            else:
+                print(f"{device} has no getVolume attribute")
+
+        return totVol
+
+    def getTotalSysLength(self):
+        totLen = 0
+        for device in self.devices:
+            if(getattr(device, 'length')):
+                print(device.length)
+                totLen += device.length
+        return totLen
+    ## Temperature iteration psuedocode
+    # Start at a node, get its temperature
+    # Compute the temperature change over the following device (using temperature delta):
+    # DeltaT(*K) = time (s)/Cp (J/Kg-*K) * heat flow (J/s)
         

@@ -7,6 +7,7 @@ Description: Class declaration for a generic pressure/temperature node.
 
 from time import time
 from warnings import warn
+from src.material import MaterialWater
 
 class Node:
     id = -1
@@ -17,12 +18,13 @@ class Node:
     temperature_units = "undefined"
     pressure_units = "undefined"
 
-    def __init__(self, id):
+    def __init__(self, id, contained_material = MaterialWater):
         self.id = id
         self.startTime = time()
         self.timeSinceStart = 0
         self.inlet_attached = None
         self.outlet_attached = None
+        self.material = contained_material
 
     def getTemperature(self):
         return self.temperature
@@ -32,6 +34,9 @@ class Node:
     
     def getFlowRate(self):
         return self.flow_rate
+
+    def setContainedMaterial(self, material):
+        self.material = material
 
     def setTemperature (self, temperature):
         self.temperature = temperature

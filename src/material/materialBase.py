@@ -6,9 +6,10 @@ Description: File for the class declaration for a generic material.
 """
 
 class MaterialBase:
-    def __init__(self, density, viscosity):
+    def __init__(self, density, viscosity, spec_heat):
         self.density = density
         self.viscosity = viscosity
+        self.cp = spec_heat
 
     def getViscosity (self):
         """Get the viscosity of the material in m^2/s
@@ -43,5 +44,13 @@ class MaterialBase:
         """
 
         self.density = density
+
+    def getSpecHeat (self):
+        """Returns the specific heat of the material in Joules/kg-K
+
+        Returns:
+            float: Returns Cp, a measure of required heat to raise the temperature of the material in J/kg-K
+        """
+        return self.cp
 
 
