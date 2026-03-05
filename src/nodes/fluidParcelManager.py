@@ -30,7 +30,10 @@ class FluidParcelManager:
             len = i/n * self.totalLength
             print(len)
             element, frac = self.determinePositionFromLen(len)
-            self.fluids.append(FluidParcelManager.FluidParcel(i, element, frac, totalMass/n, self.material, startTemp))
+            parcel = FluidParcelManager.FluidParcel(i, element, frac, totalMass/n, self.material, startTemp)
+
+            element.addParcel(parcel)
+            self.fluids.append(parcel)
 
         self.lastTime = time()
 
@@ -45,7 +48,10 @@ class FluidParcelManager:
             parcel.position += dfrac
 
             if parcel.position > 1:
+                parcel.element.removeParcel(parcel)
+
                 parcel.element = parcel.element.outlet_node.getOutletDevice()
+                parcel.element.addParcel(parcel)
                 parcel.element.outlet_node.setTemperature(parcel.temperature)
                 parcel.position -= 1
         

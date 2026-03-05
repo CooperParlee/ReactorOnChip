@@ -58,6 +58,11 @@ class DeviceInline(Device):
 
     def getInlet(self):
         return self.inlet_node
+
+    def addParcel (self, parcel):
+        self.parcels.append(parcel)
+    def removeParcel(self, parcel):
+        self.parcels.remove(parcel)
     
     def setFlow(self, flow):
         self.flow = flow
