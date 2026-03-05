@@ -16,8 +16,8 @@ from numpy import exp
 
 
 class DevicePump (DeviceInline):
-    def __init__(self, manager : "NodeManager", inlet=-1, outlet=-1, maxSpeed = 3480):
-        super().__init__(manager, inlet, outlet)
+    def __init__(self, manager : "NodeManager", inlet=-1, outlet=-1, maxSpeed = 3480, volume = -1):
+        super().__init__(manager, inlet, outlet, volume=volume)
         self.setpoint = 0
         self.processPoint = 0 # percent of pump maximum RPMs, used for updating the curve function
         self.lastPoint = 0
@@ -36,7 +36,7 @@ class DevicePump (DeviceInline):
         deltaT = time() - self.lastSet
 
         error = (self.setpoint - self.lastPoint) * (exp(-(deltaT)/self.timeConst))
-        print(f"e: {error}")
+        #print(f"e: {error}")
         self.processPoint = self.setpoint - error
     def setPumpCurve (self, curve):
         if (not callable(curve)):

@@ -27,7 +27,7 @@ class DeviceInline(Device):
         # Always assume that flow rate will be the same into and out of a device
         self.outlet_node.setFlowRate(self.inlet_node.getFlowRate())
     
-    def __init__(self, manager : 'NodeManager', inlet=-1, outlet=-1, k=0, diameter=-1, verbose=False):
+    def __init__(self, manager : 'NodeManager', inlet=-1, outlet=-1, k=0, diameter=-1, volume = -1, length = 1, verbose=False):
         super().__init__(k=k, verbose = verbose)
         # Initialize nodes if inlet or outlet go unspecified.
         if (inlet == -1):
@@ -44,14 +44,30 @@ class DeviceInline(Device):
             self.diameter = manager.getDefaultDiameter()
         else:
             self.diameter = diameter
+
         self.a = (self.diameter ** 2 * pi / 4)
+        self.length = length
+        
+        if (volume == -1):
+            volume = self.computeVolume()
+
+        self.volume = volume
+        self.flow = 0
+
+        self.parcels = []
 
     def getInlet(self):
         return self.inlet_node
+    
+    def setFlow(self, flow):
+        self.flow = flow
 
     def getOutlet(self):
         return self.outlet_node
     
+    def computeVolume(self):
+        return self.a * 0.5 * self.diameter
+
     def getDiameter(self):
         return self.diameter
 
@@ -61,3 +77,8 @@ class DeviceInline(Device):
         v = Q / self.a
 
         return self.k * (v**2 / 2 / g)
+
+    def computeHeatFlow(self, mdot, T_media):
+        return 0
+    def getVolume(self):
+        return self.volume

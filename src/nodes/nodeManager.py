@@ -86,6 +86,7 @@ class ControlLoop:
         self.pipes = []
         self.nodes = {}
         self.pumps = []
+        self.lastTime = -1
         self.reference_node = reference_node
 
     def setReferenceNode(self, reference_node : Node, offset_pressure = 0, offset_temperature = 0):
@@ -219,6 +220,7 @@ class ControlLoop:
         return 0,0
 
     def __iterateDeltaP__ (self, device, flow, last_pressure):
+        device.setFlow(flow)
         if(device.getOutlet() == self.reference_node):
             return 
         drop = 0
@@ -241,7 +243,7 @@ class ControlLoop:
         return self.__iterateDeltaP__ (device.getOutlet().getOutletDevice(), flow, last_pressure) 
 
     def computeDeltas(self, flow):
-        if (self.lastTime == None):
+        if (self.lastTime == -1):
             self.lastTime = time()
         dTime = time() - self.lastTime
 
@@ -249,10 +251,10 @@ class ControlLoop:
         start = time()
         chain = self.__iterateDeltaP__(self.reference_node.getOutletDevice(), flow, self.offset_pressure)
         finish = time() - start
-        print(f"Iterating P deltas took {finish} seconds.")
+        #print(f"Iterating P deltas took {finish} seconds.")
 
         start = time()
-        chainT = self.__iterateDeltaT__(self.reference_node.getOutletDevice(), flow, dTime)
+        #chainT = self.__iterateDeltaT__(self.reference_node.getOutletDevice(), flow, dTime)
 
         self.lastTime = time()
         
@@ -272,9 +274,10 @@ class ControlLoop:
 
     def getTotalSysLength(self):
         totLen = 0
+        print("Lengths:")
         for device in self.devices:
             if(getattr(device, 'length')):
-                print(device.length)
+                print(f"{device} : {device.length}")
                 totLen += device.length
         return totLen
     ## Temperature iteration psuedocode

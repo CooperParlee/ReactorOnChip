@@ -6,12 +6,14 @@ Description: Unit test that creates a basic cooling water loop with two heat exc
 """
 
 from src.nodes.nodeManager import NodeManager, ControlLoop
+from src.nodes.fluidParcelManager import FluidParcelManager
 from src.devices import DevicePump
 from src.devices import DevicePipe
 from src.devices import DeviceInline
 from src.devices import DevicePressureSensor, DeviceTempSensor
 from src.devices import DeviceSpeedSensor
 from src.modBus import ModbusManager
+from src.material.materialWater import MaterialWater
 from time import time, sleep
 import numpy as np
 import matplotlib.pyplot as plt
@@ -34,11 +36,11 @@ mgr = NodeManager(default_diameter = dia)
 controlLoop = ControlLoop(density=density, viscosity=viscosity)
 
 # Initialize pump, let it initialize its own nodes
-pump = DevicePump(mgr)
+pump = DevicePump(mgr, volume=0.02242694)
 pump.setPumpCurve((lambda q: -241374 * q**2 - 2.2726 * q + 19.105))
 
-hxcooler = DeviceInline(mgr, k=50)
-hxheater = DeviceInline(mgr, k=50)
+hxcooler = DeviceInline(mgr, k=50, length = 5)
+hxheater = DeviceInline(mgr, k=50, length = 5)
 
 # Create a pipe out of the pump and into the heat exchanger
 p1 = DevicePipe(mgr, pump.getOutlet(), hxcooler.getInlet(), roughness=rough, length=5, diameter=dia,
@@ -85,6 +87,8 @@ modbusMgr.addSensors([
     pumpSpeed])
 modbusMgr.register_hr_callback(300, pump.processPointCallback)
 
+parcels = FluidParcelManager(mgr, controlLoop, MaterialWater())
+
 # Create a function "task" for the asynchronous thread
 def start_server():
     asyncio.run(modbusMgr.run_server())
@@ -94,7 +98,7 @@ serverThread = threading.Thread(target=start_server)
 serverThread.start()
 
 # Initialize the synchronous thread
-def startUpdates(sleepTime = 0.5):
+def startUpdates(sleepTime = 0.05):
     run = True
     while(run == True):
         for pump in controlLoop.getPumps():
@@ -103,6 +107,7 @@ def startUpdates(sleepTime = 0.5):
         op = controlLoop.computeOpPoint()
         flow = op[0]
         controlLoop.computeDeltas(flow)
+        parcels.update()
 
         print(pump.getOutlet().getPressure())
 

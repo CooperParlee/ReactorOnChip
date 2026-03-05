@@ -34,11 +34,10 @@ class DevicePipe(DeviceInline):
             viscosity (float, optional): Viscosity of the contained media (m^2/s). Defaults to 1.02E-3.
         """
         self.roughness = roughness
-        self.length = length
         self.diameter = diameter
         self.density = density
         self.viscosity = viscosity
-        super().__init__(manager, inlet_node, outlet_node, diameter=diameter, k=k)
+        super().__init__(manager, inlet_node, outlet_node, diameter=diameter, k=k, length=length)
 
     def setRoughness(self, roughness):
         """Set the pipe roughness.
@@ -47,6 +46,9 @@ class DevicePipe(DeviceInline):
             roughness (float): Pipe roughness (m)
         """
         self.roughness = roughness
+
+    def computeVolume(self):
+        return self.length * self.diameter ** 2 / 4 * pi
 
     def setLength (self, length):
         """Set the pipe length in meters.
