@@ -9,16 +9,10 @@ from warnings import warn
 
 class Device:
 
-    def __init__(self, k=0, verbose=False):
-        self.k = k
+    def __init__(self, k = 0, verbose=False):
         self.verbose = verbose
-        self.addresses = []
-
-    def getK(self):
-        return self.k
-
-    def setK(self, k):
         self.k = k
+        self.addresses = []
 
     def getAddresses(self):
         return self.addresses

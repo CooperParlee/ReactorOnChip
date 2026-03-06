@@ -10,6 +10,7 @@ from src.nodes.fluidParcelManager import FluidParcelManager
 from src.devices import DevicePump
 from src.devices import DevicePipe
 from src.devices import DeviceInline
+from src.devices import DevicePlateHX
 from src.devices import DevicePressureSensor, DeviceTempSensor
 from src.devices import DeviceSpeedSensor
 from src.modBus import ModbusManager
@@ -40,7 +41,7 @@ pump = DevicePump(mgr, volume=0.02242694)
 pump.setPumpCurve((lambda q: -241374 * q**2 - 2.2726 * q + 19.105))
 
 hxcooler = DeviceInline(mgr, k=50, length = 5)
-hxheater = DeviceInline(mgr, k=50, length = 5)
+hxheater = DevicePlateHX(mgr, k=50, length = 5, area = 12, l_c = 2E-3, mass=120)
 
 # Create a pipe out of the pump and into the heat exchanger
 p1 = DevicePipe(mgr, pump.getOutlet(), hxcooler.getInlet(), roughness=rough, length=5, diameter=dia,

@@ -11,6 +11,7 @@ from src.devices import DevicePipe
 from src.devices import DeviceInline
 from src.devices import DeviceParallel
 from src.devices import DevicePump
+from src.devices import DeviceThermal
 
 from src.material import MaterialWater
 

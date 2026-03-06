@@ -28,7 +28,7 @@ class DeviceInline(Device):
         self.outlet_node.setFlowRate(self.inlet_node.getFlowRate())
     
     def __init__(self, manager : 'NodeManager', inlet=-1, outlet=-1, k=0, diameter=-1, volume = -1, length = 1, verbose=False):
-        super().__init__(k=k, verbose = verbose)
+        super().__init__(k = k, verbose = verbose)
         # Initialize nodes if inlet or outlet go unspecified.
         if (inlet == -1):
             inlet = manager.addNode()
@@ -53,6 +53,7 @@ class DeviceInline(Device):
 
         self.volume = volume
         self.flow = 0
+        self.containedMass = -1
 
         self.parcels = []
 
@@ -61,14 +62,28 @@ class DeviceInline(Device):
 
     def addParcel (self, parcel):
         self.parcels.append(parcel)
+        self.computeContainedMass()
+        self.getInlet().setTemperature(parcel.temperature)
+
     def removeParcel(self, parcel):
         self.parcels.remove(parcel)
+        self.computeContainedMass()
     
     def setFlow(self, flow):
         self.flow = flow
 
     def getOutlet(self):
         return self.outlet_node
+
+    def computeContainedMass(self):
+        self.containedMass = 0
+        for parcel in self.parcels:
+            self.containedMass += parcel.mass
+
+    def getContainedMass(self):
+        if (self.containedMass == -1):
+            self.computeContainedMass()
+        return self.containedMass
     
     def computeVolume(self):
         return self.a * 0.5 * self.diameter

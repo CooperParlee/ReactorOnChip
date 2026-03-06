@@ -1,4 +1,5 @@
 from time import time
+from src.devices import DeviceThermal
 class FluidParcelManager:
     class FluidParcel:
         def __init__ (self, parcelCode, element, startPosition, mass, material, temperature):
@@ -15,7 +16,7 @@ class FluidParcelManager:
                 return device, len / device.length
             len -= device.length
 
-    def __init__(self, nodeManager, controlLoop, material, startTemp = 273, n=20):
+    def __init__(self, nodeManager, controlLoop, material, startTemp = 250, n=20):
         self.nodeManager = nodeManager
         self.controlLoop = controlLoop
         self.material = material
@@ -23,7 +24,7 @@ class FluidParcelManager:
         self.fluids = []
 
         totalVol = controlLoop.determineSysVol()
-        totalMass = totalVol/material.density
+        totalMass = totalVol*material.density
         self.totalLength = controlLoop.getTotalSysLength()
         
         for i in range(n):
@@ -43,17 +44,28 @@ class FluidParcelManager:
     def update (self):
         dt = time() - self.lastTime
         for parcel in self.fluids:
-            v = parcel.element.flow / parcel.element.a
-            dfrac = dt * v / parcel.element.length
+            element = parcel.element
+            if isinstance(element, DeviceThermal):
+                print("yes, is a thermal object")
+                _totalmass = element.getContainedMass()
+                dT = element.temperature - parcel.temperature
+
+                energy = element.getHeatFlow(element.a_total * parcel.mass / _totalmass, dT, dt)
+                parcel.temperature += energy/parcel.material.getSpecHeat()/parcel.mass
+
+                print(f"{parcel.mass} / {_totalmass}")
+
+            v = element.flow / element.a
+            dfrac = dt * v / element.length
             parcel.position += dfrac
 
             if parcel.position > 1:
-                parcel.element.removeParcel(parcel)
+                element.removeParcel(parcel)
 
-                parcel.element = parcel.element.outlet_node.getOutletDevice()
-                parcel.element.addParcel(parcel)
-                parcel.element.outlet_node.setTemperature(parcel.temperature)
-                parcel.position -= 1
+                element = element.outlet_node.getOutletDevice()
+                element.addParcel(parcel)
+                element.outlet_node.setTemperature(parcel.temperature)
+                parcel.position = parcel.position % 1
         
         print(self.fluids[0].element)
 
