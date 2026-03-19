@@ -97,11 +97,11 @@ def start_server():
     asyncio.run(modbusMgr.run_server(address = configDat['address'], port = configDat['port']))
 
 # Initialize and start the asynchronous modbus manager thread
-serverThread = threading.Thread(target=start_server)
+serverThread = threading.Thread(target=start_server, daemon=True)
 serverThread.start()
 
 # Initialize the synchronous thread
-def startUpdates(sleepTime = 0.05):
+def startUpdates(sleepTime = configDat['sleep_time']):
     run = True
     while(run == True):
         for pump in controlLoop.getPumps():
