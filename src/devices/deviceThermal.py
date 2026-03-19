@@ -1,6 +1,6 @@
 from time import time
 
-from src.plotting.dump import dump_arrays_to_excel
+from src.util.dump import dump_arrays_to_excel
 
 class DeviceThermal:
     def __init__(self, k_th = 1, a_total = 0, mass = 0, cp = 500, l_c = 0, temperature = 293):

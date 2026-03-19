@@ -20,8 +20,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import asyncio
 import threading
+from src.util.config import Config
 
 start = time()
+configDat = Config.readConfig()
 
 # Default characteristics
 # 1.5-inch pipe
@@ -88,11 +90,11 @@ modbusMgr.addSensors([
     pumpSpeed])
 modbusMgr.register_hr_callback(300, pump.processPointCallback)
 
-parcels = FluidParcelManager(mgr, controlLoop, MaterialWater(), n=25)
+parcels = FluidParcelManager(mgr, controlLoop, MaterialWater(), n=configDat['fluid_parcels'])
 
 # Create a function "task" for the asynchronous thread
 def start_server():
-    asyncio.run(modbusMgr.run_server())
+    asyncio.run(modbusMgr.run_server(address = configDat['address'], port = configDat['port']))
 
 # Initialize and start the asynchronous modbus manager thread
 serverThread = threading.Thread(target=start_server)
