@@ -8,9 +8,11 @@ Description: A basic class for reading pump speed sensor values
 from src.devices import Device, DevicePump, DeviceSensorBase
 
 class DeviceSpeedSensor (Device, DeviceSensorBase):
-    def __init__(self, attached_pump : DevicePump, scale = 1):
+    def __init__(self, attached_pump : DevicePump, scale = 1, noise=0.05):
         super().__init__()
         self.attached_pump = attached_pump
         self.scale = scale
+        self.noise = noise
+
     def get(self):
-        return self.attached_pump.getSpeed()
+        return self.doNoise(self.attached_pump.getSpeed())

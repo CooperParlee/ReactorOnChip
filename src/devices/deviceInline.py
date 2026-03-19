@@ -99,7 +99,5 @@ class DeviceInline(Device):
 
         return self.k * (v**2 / 2 / g)
 
-    def computeHeatFlow(self, mdot, T_media):
-        return 0
     def getVolume(self):
         return self.volume

@@ -16,7 +16,7 @@ class FluidParcelManager:
                 return device, len / device.length
             len -= device.length
 
-    def __init__(self, nodeManager, controlLoop, material, startTemp = 250, n=20):
+    def __init__(self, nodeManager, controlLoop, material, startTemp = 290, n=20):
         self.nodeManager = nodeManager
         self.controlLoop = controlLoop
         self.material = material

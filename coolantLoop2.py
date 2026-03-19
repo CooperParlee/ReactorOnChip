@@ -41,7 +41,7 @@ pump = DevicePump(mgr, volume=0.02242694)
 pump.setPumpCurve((lambda q: -241374 * q**2 - 2.2726 * q + 19.105))
 
 hxcooler = DeviceInline(mgr, k=50, length = 5)
-hxheater = DevicePlateHX(mgr, k=50, length = 10, area = 12, l_c = 2E-3, mass=120)
+hxheater = DevicePlateHX(mgr, k=50, length = 10, area = 12, l_c = 2E-3, mass=120, temperature=350)
 
 # Create a pipe out of the pump and into the heat exchanger
 p1 = DevicePipe(mgr, pump.getOutlet(), hxcooler.getInlet(), roughness=rough, length=5, diameter=dia,

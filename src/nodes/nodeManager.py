@@ -64,11 +64,11 @@ class NodeManager:
         else: 
             return None
 
-    def initializeTemps (self, init_temp = 273):
-        """Initialize all of the nodes within the node manager to a defined temperature. The default is 273*K.
+    def initializeTemps (self, init_temp = 290):
+        """Initialize all of the nodes within the node manager to a defined temperature. The default is 290*K.
 
         Args:
-            init_temp (int, optional): temperature to initialize the nodes to. Defaults to 273*K.
+            init_temp (int, optional): temperature to initialize the nodes to. Defaults to 290*K.
         """
         for node in self.nodes:
             node.setTemperature(init_temp)

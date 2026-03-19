@@ -7,10 +7,11 @@ Description: A basic class for reading temperature sensor values
 from src.devices import DeviceParallel, DeviceSensorBase
 
 class DeviceTempSensor (DeviceParallel, DeviceSensorBase):
-    def __init__(self, attached_node, scale = 10):
+    def __init__(self, attached_node, scale = 10, noise = 0.05):
         super().__init__(attached_node)
         self.scale = scale
+        self.noise = noise
 
     def get(self):
         super().get()
-        return self.temp
+        return self.doNoise(self.temp)

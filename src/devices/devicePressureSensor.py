@@ -8,9 +8,10 @@ from src.devices import DeviceParallel
 from src.devices import DeviceSensorBase
 
 class DevicePressureSensor (DeviceParallel, DeviceSensorBase):
-    def __init__(self, attached_node, scale = 100):
+    def __init__(self, attached_node, scale = 100, noise = 0.05):
         super().__init__(attached_node)
         self.scale = scale
+        self.noise = noise
     def get(self):
         super().get()
-        return self.pressure
+        return self.doNoise(self.pressure)
