@@ -29,7 +29,7 @@ class FluidParcelManager:
         
         for i in range(n):
             len = i/n * self.totalLength
-            print(len)
+            #print(len)
             element, frac = self.determinePositionFromLen(len)
             parcel = FluidParcelManager.FluidParcel(i, element, frac, totalMass/n, self.material, startTemp)
 
@@ -38,22 +38,20 @@ class FluidParcelManager:
 
         self.lastTime = time()
 
-        for parcel in self.fluids:
-            print(parcel.element)
-
     def update (self):
         dt = time() - self.lastTime
         for parcel in self.fluids:
             element = parcel.element
             if isinstance(element, DeviceThermal):
-                print("yes, is a thermal object")
+                #print("yes, is a thermal object")
                 _totalmass = element.getContainedMass()
+                print(element.parcels)
                 dT = element.temperature - parcel.temperature
 
                 energy = element.getHeatFlow(element.a_total * parcel.mass / _totalmass, dT, dt)
                 parcel.temperature += energy/parcel.material.getSpecHeat()/parcel.mass
 
-                print(f"{parcel.mass} / {_totalmass}")
+                #print(f"{parcel.mass} / {_totalmass}")
 
             v = element.flow / element.a
             dfrac = dt * v / element.length
@@ -64,9 +62,11 @@ class FluidParcelManager:
 
                 element = element.outlet_node.getOutletDevice()
                 element.addParcel(parcel)
-                element.outlet_node.setTemperature(parcel.temperature)
+                element.inlet_node.setTemperature(parcel.temperature)
+                parcel.element = element
                 parcel.position = parcel.position % 1
+
         
-        print(self.fluids[0].element)
+        #print(self.fluids[0].element)
 
         self.lastTime = time()

@@ -66,7 +66,8 @@ class DeviceInline(Device):
         self.getInlet().setTemperature(parcel.temperature)
 
     def removeParcel(self, parcel):
-        self.parcels.remove(parcel)
+        if (parcel in self.parcels):
+            self.parcels.remove(parcel)
         self.computeContainedMass()
     
     def setFlow(self, flow):
