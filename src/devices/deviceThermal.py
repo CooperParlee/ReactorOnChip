@@ -29,6 +29,7 @@ class DeviceThermal:
         self.temp_array = []
         self.time_array = []
         self.debounce = False
+        self.constT = False
     def getHeatFlow(self, area, dT, dt):
         """Returns the heat flow in Joules in the thermal object using a fractional area (determined elsewhere)
         and the resistance coefficient determined on the initialization of the function.
@@ -48,7 +49,7 @@ class DeviceThermal:
             self.temp_array.append(self.temperature)
             self.time_array.append(time() - self.start_time)
 
-            if (time() - self.start_time > 10 and not self.debounce): # takes an excel sized shit after 10 seconds
+            if (time() - self.start_time > 120 and not self.debounce): # takes an excel sized shit after 10 seconds
                 dump_arrays_to_excel(self.time_array, self.temp_array, "thermal_log.xlsx", headers=("Time(s)", "Temperature(K)"))
                 self.debounce = True
 
@@ -61,4 +62,5 @@ class DeviceThermal:
             Q (float): [W] heat flow into the mass
             dt (float): time delta since last calculated
         """
-        self.temperature -= Q/self.cp/self.mass*dt
+        if (not self.constT):
+            self.temperature -= Q/self.cp/self.mass*dt

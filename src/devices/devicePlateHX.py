@@ -14,6 +14,11 @@ if TYPE_CHECKING:
 class DevicePlateHX(DeviceInline, DeviceThermal):
     def __init__(self, manager : 'NodeManager', inlet=-1, outlet=-1, k = 0, k_th=50, diameter=-1, temperature = 293, 
     mass = 0, cp = 500, l_c = 0.1, length = 1,
-    area = 0, verbose=False):
+    area = 0, verbose=False, **kwargs):
         DeviceInline.__init__(self, manager=manager, inlet=inlet, outlet=outlet, diameter=diameter, length = length, k=k, verbose=verbose)
         DeviceThermal.__init__(self, k_th=k_th, a_total=area, mass = mass, cp = cp, l_c = l_c, temperature = temperature)
+
+        if ('constT' in kwargs):
+            if (kwargs['constT']):
+                self.constT = True
+    

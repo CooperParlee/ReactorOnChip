@@ -79,7 +79,7 @@ class ControlLoop:
 
     minCheck = 0.0001
 
-    def __init__(self, density=999, viscosity=1.02E-3, reference_node = None):
+    def __init__(self, density=999, viscosity=1.02E-3, reference_node = None, verbose = False):
         self.density = density
         self.viscosity = viscosity
         self.k = -1
@@ -89,6 +89,8 @@ class ControlLoop:
         self.pumps = []
         self.lastTime = -1
         self.reference_node = reference_node
+
+        self.verbose = verbose
 
     def setReferenceNode(self, reference_node : Node, offset_pressure = 0, offset_temperature = 0):
         self.reference_node = reference_node
@@ -266,7 +268,7 @@ class ControlLoop:
 
         for device in dev:
             if (callable(getattr(device, 'getVolume'))):
-                print(f"{device}: {device.getVolume()}")
+                if(self.verbose): print(f"{device}: {device.getVolume()}")
                 totVol = totVol + device.getVolume()
             else:
                 print(f"{device} has no getVolume attribute")
@@ -275,14 +277,12 @@ class ControlLoop:
 
     def getTotalSysLength(self):
         totLen = 0
-        print("Lengths:")
+        if (self.verbose): print("Lengths:")
+        
         for device in self.devices:
             if(getattr(device, 'length')):
-                print(f"{device} : {device.length}")
+                if(self.verbose): print(f"{device} : {device.length}")
                 totLen += device.length
         return totLen
-    ## Temperature iteration psuedocode
-    # Start at a node, get its temperature
-    # Compute the temperature change over the following device (using temperature delta):
-    # DeltaT(*K) = time (s)/Cp (J/Kg-*K) * heat flow (J/s)
+
         

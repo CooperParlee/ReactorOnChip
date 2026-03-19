@@ -10,7 +10,7 @@ from src.nodes.fluidParcelManager import FluidParcelManager
 from src.devices import DevicePump
 from src.devices import DevicePipe
 from src.devices import DeviceInline
-from src.devices import DevicePlateHX
+from src.devices import DevicePlateHX, special_DeviceInternalEngineHX
 from src.devices import DevicePressureSensor, DeviceTempSensor
 from src.devices import DeviceSpeedSensor
 from src.modBus import ModbusManager
@@ -42,8 +42,9 @@ controlLoop = ControlLoop(density=density, viscosity=viscosity)
 pump = DevicePump(mgr, volume=0.02242694)
 pump.setPumpCurve((lambda q: -241374 * q**2 - 2.2726 * q + 19.105))
 
-hxcooler = DevicePlateHX(mgr, k=50, length = 10, area = 12, l_c = 2E-3, mass=120, temperature=350, verbose=True)
-hxSaltW = DevicePlateHX(mgr, k=50, length = 10, area = 12, l_c = 2E-3, mass=120, temperature=273)
+hxcooler = special_DeviceInternalEngineHX(mgr, k=50, length = 10, area = 12, l_c = 2E-3, mass=120, temperature=350, 
+verbose=True, engPwr = 50, engIneff = 0.3)
+hxSaltW = DevicePlateHX(mgr, k=50, length = 10, area = 12, l_c = 2E-3, mass=120, temperature=273, constT = True)
 
 # Create a pipe out of the pump and into the heat exchanger
 p1 = DevicePipe(mgr, pump.getOutlet(), hxcooler.getInlet(), roughness=rough, length=5, diameter=dia,
@@ -95,6 +96,7 @@ modbusMgr.addSensors([
     pumpSpeed])
 
 modbusMgr.register_hr_callback(300, pump.processPointCallback)
+modbusMgr.register_hr_callback(301, hxcooler.updateEngineLoadCallback)
 
 parcels = FluidParcelManager(mgr, controlLoop, MaterialWater(), n=configDat['fluid_parcels'])
 

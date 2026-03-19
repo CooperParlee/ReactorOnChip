@@ -31,8 +31,8 @@ class ModbusManager:
         self.store = ModbusDeviceContext(
             di = ModbusSequentialDataBlock(100, [False]*100), # discrete inputs (100) - read only
             co = ModbusSequentialDataBlock(200, [False]*100), # coils (100) - read/write bits
-            hr = ModbusSequentialDataBlock(300, [1]*100), # holding registers (read/write 16-bits)
-            ir = ModbusSequentialDataBlock(400, [2]*100), # input registers (100) - read only 16-bit
+            hr = ModbusSequentialDataBlock(300, [0]*100), # holding registers (read/write 16-bits)
+            ir = ModbusSequentialDataBlock(400, [0]*100), # input registers (100) - read only 16-bit
         )
 
         context = ModbusServerContext(devices=self.store, single=True) # Create context containing one store as single context
@@ -77,7 +77,7 @@ class ModbusManager:
                 address = addresses[i]
                 old_val = self.holding_register_cache.get(address)
                 if(old_val != val):
-                    print(f"address changed to {val}")
+                    if (old_val is not None): print(f"address changed to {val}")
                     if address in self.holding_register_callbacks:
                         for callback in self.holding_register_callbacks[address]:
                             try:
@@ -94,7 +94,6 @@ class ModbusManager:
             for i in range(self.lastFree, 499):
                 if i not in self.addresses:
                     address = i
-                    print(i)
                     self.lastFree = i+1
                     break
             if (address == -1): 

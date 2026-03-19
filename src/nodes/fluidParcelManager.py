@@ -45,7 +45,7 @@ class FluidParcelManager:
             if isinstance(element, DeviceThermal):
                 #print("yes, is a thermal object")
                 _totalmass = element.getContainedMass()
-                print(element.parcels)
+                #print(element.parcels)
                 dT = element.temperature - parcel.temperature
 
                 energy = element.getHeatFlow(element.a_total * parcel.mass / _totalmass, dT, dt)

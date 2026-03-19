@@ -10,6 +10,7 @@ from src.devices.deviceSensorBase import DeviceSensorBase
 from src.devices.deviceTempSensor import DeviceTempSensor
 from src.devices.devicePressureSensor import DevicePressureSensor
 from src.devices.deviceSpeedSensor import DeviceSpeedSensor
+from src.devices.special_deviceInternalEngineHX import special_DeviceInternalEngineHX
 
 __all__ = [
     "Device",
@@ -23,5 +24,6 @@ __all__ = [
     "DeviceTempSensor",
     "DevicePressureSensor",
     "DeviceSpeedSensor",
-    "DeviceSensorBase"
+    "DeviceSensorBase",
+    "special_DeviceInternalEngineHX"
 ]
