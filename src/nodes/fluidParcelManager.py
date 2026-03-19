@@ -49,6 +49,7 @@ class FluidParcelManager:
                 dT = element.temperature - parcel.temperature
 
                 energy = element.getHeatFlow(element.a_total * parcel.mass / _totalmass, dT, dt)
+                element.updateThermalMass(energy/dt, dt) # test this
                 parcel.temperature += energy/parcel.material.getSpecHeat()/parcel.mass
 
                 #print(f"{parcel.mass} / {_totalmass}")

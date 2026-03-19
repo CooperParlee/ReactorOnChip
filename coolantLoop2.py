@@ -42,20 +42,20 @@ controlLoop = ControlLoop(density=density, viscosity=viscosity)
 pump = DevicePump(mgr, volume=0.02242694)
 pump.setPumpCurve((lambda q: -241374 * q**2 - 2.2726 * q + 19.105))
 
-hxcooler = DeviceInline(mgr, k=50, length = 5)
-hxheater = DevicePlateHX(mgr, k=50, length = 10, area = 12, l_c = 2E-3, mass=120, temperature=350)
+hxcooler = DevicePlateHX(mgr, k=50, length = 10, area = 12, l_c = 2E-3, mass=120, temperature=350, verbose=True)
+hxSaltW = DevicePlateHX(mgr, k=50, length = 10, area = 12, l_c = 2E-3, mass=120, temperature=273)
 
 # Create a pipe out of the pump and into the heat exchanger
 p1 = DevicePipe(mgr, pump.getOutlet(), hxcooler.getInlet(), roughness=rough, length=5, diameter=dia,
                 viscosity = viscosity, density = density, k = 0.5)
 # Now do the same with the cooler into the heater hx
-p2 = DevicePipe(mgr, hxcooler.getOutlet(), hxheater.getInlet(), roughness=rough, length=10, diameter=dia,
+p2 = DevicePipe(mgr, hxcooler.getOutlet(), hxSaltW.getInlet(), roughness=rough, length=10, diameter=dia,
                 viscosity = viscosity, density = density, k = 0.75)
 # Finally, pipe from heater to pump suction
-p3 = DevicePipe(mgr, hxheater.getOutlet(), pump.getInlet(), roughness=rough, length=5, diameter=dia,
+p3 = DevicePipe(mgr, hxSaltW.getOutlet(), pump.getInlet(), roughness=rough, length=5, diameter=dia,
                 viscosity = viscosity, density = density, k = 0.5)
 
-controlLoop.addDevices([pump, hxcooler, hxheater, p1, p2, p3])
+controlLoop.addDevices([pump, hxcooler, hxSaltW, p1, p2, p3])
 
 controlLoop.setReferenceNode(pump.getInlet())
 pump.setProcessPoint(1)
@@ -67,27 +67,33 @@ pumpOut = DevicePressureSensor(pump.getOutlet())
 coolerIn = DevicePressureSensor(hxcooler.getInlet())
 coolerOut = DevicePressureSensor(hxcooler.getOutlet())
 
-htrIn = DevicePressureSensor(hxheater.getInlet())
-htrOut = DevicePressureSensor(hxheater.getOutlet())
+swCoolerP_in = DevicePressureSensor(hxSaltW.getInlet())
+swCoolerP_out = DevicePressureSensor(hxSaltW.getOutlet())
 
 pumpSpeed = DeviceSpeedSensor(pump)
 
 # Initialize the temperatures
 mgr.initializeTemps()
 
-htrTempIn = DeviceTempSensor(hxheater.getInlet())
-htrTempOut = DeviceTempSensor(hxheater.getOutlet())
+coolrTempIn = DeviceTempSensor(hxcooler.getInlet())
+coolrTempOut = DeviceTempSensor(hxcooler.getOutlet())
+
+htrTempIn = DeviceTempSensor(hxSaltW.getInlet())
+htrTempOut = DeviceTempSensor(hxSaltW.getOutlet())
+
 
 # Start the modbus manager and add our sensors to it
 modbusMgr = ModbusManager()
 
 modbusMgr.addSensors([
     # Pressure Sensors:
-    pumpIn, pumpOut, coolerIn, coolerOut, htrIn, htrOut, 
+    pumpIn, pumpOut, coolerIn, coolerOut, swCoolerP_in, swCoolerP_out, 
     # Temperature Sensors:
+    coolrTempIn, coolrTempOut,
     htrTempIn, htrTempOut,
     # Other:
     pumpSpeed])
+
 modbusMgr.register_hr_callback(300, pump.processPointCallback)
 
 parcels = FluidParcelManager(mgr, controlLoop, MaterialWater(), n=configDat['fluid_parcels'])

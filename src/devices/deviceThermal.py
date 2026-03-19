@@ -40,18 +40,25 @@ class DeviceThermal:
         R = (self.r_cond + self.r_conv) * (self.a_total / area)
         #u = 1/self.r_cond/area # [W/m^2-K]
         Q = dT/ R * dt
-        self.temperature -= Q/self.cp/self.mass
 
-        # For logging purposes
-        self.temp_array.append(self.temperature)
-        self.time_array.append(time() - self.start_time)
+        #self.temperature -= Q/self.cp/self.mass
 
-        if (time() - self.start_time > 10 and not self.debounce): # takes an excel sized shit after 10 seconds
-            dump_arrays_to_excel(self.time_array, self.temp_array, "output.xlsx", headers=("Time(s)", "Temperature(K)"))
-            self.debounce = True
+        if(self.verbose):
+            # For logging purposes
+            self.temp_array.append(self.temperature)
+            self.time_array.append(time() - self.start_time)
+
+            if (time() - self.start_time > 10 and not self.debounce): # takes an excel sized shit after 10 seconds
+                dump_arrays_to_excel(self.time_array, self.temp_array, "thermal_log.xlsx", headers=("Time(s)", "Temperature(K)"))
+                self.debounce = True
 
         return Q
 
-    def updateThermalMass(self, q):
-        dt = q/self.cp
-        self.temperature -= dt
+    def updateThermalMass(self, Q, dt):
+        """_summary_
+
+        Args:
+            Q (float): [W] heat flow into the mass
+            dt (float): time delta since last calculated
+        """
+        self.temperature -= Q/self.cp/self.mass*dt
